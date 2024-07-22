@@ -14,14 +14,17 @@ message AuthenticationChallengeRequest {
     int64 r1 = 2;
     int64 r2 = 3;
 }
+
 message AuthenticationChallengeResponse {
     string auth_id = 1;
     int64 c = 2;
 }
+
 message AuthenticationAnswerRequest {
     string auth_id = 1;
     int64 s = 2;
 }
+
 message AuthenticationAnswerResponse {
     string session_id = 1;
 }
