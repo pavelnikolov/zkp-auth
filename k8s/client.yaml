@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: app
+  namespace: zkpauth-client
+  labels:
+    app: app
+spec:
+    template:
+      metadata:
+        labels:
+          app: app
+      spec:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - server
+                  namespaces:
+                    - zkpauth
+                  topologyKey: "kubernetes.io/hostname"
+        containers:
+          - name: app
+            image: ghcr.io/pavelnikolov/zkpauth-client:overridden-later
+            env:
+              - name: SERVER_ADDR
+                value: "http://server.zkpauth:50051"
+              - name: CLIENT_ID
+                value: "client"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 100Mi
+              limits:
+                cpu: 100m
+                memory: 100Mi
+        restartPolicy: Never
