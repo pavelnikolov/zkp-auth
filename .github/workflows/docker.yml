@@ -13,10 +13,6 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        platforms: [linux/amd64, linux/arm64/v8]
-
     permissions:
       contents: read
       packages: write
@@ -57,7 +53,6 @@ jobs:
           context: .
           push: true
           file: client.Dockerfile
-          platforms: ${{ matrix.platforms }}
           tags: ${{ steps.meta_client.outputs.tags }}
           labels: ${{ steps.meta_client.outputs.labels }}
 
@@ -68,7 +63,6 @@ jobs:
           context: .
           push: true
           file: server.Dockerfile
-          platforms: ${{ matrix.platforms }}
           tags: ${{ steps.meta_server.outputs.tags }}
           labels: ${{ steps.meta_server.outputs.labels }}
 
