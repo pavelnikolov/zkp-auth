@@ -7,8 +7,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket = var.state_bucket
-    key    = "terraform/eks/terraform.tfstate"
+    bucket = "zkpauth-9d8hh34135a7"
+    key    = "terraform.tfstate"
   }
 }
 

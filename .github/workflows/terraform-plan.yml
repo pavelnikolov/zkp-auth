@@ -8,6 +8,7 @@ on:
 env:
   TF_WORKSPACE: "default"
   CONFIG_DIRECTORY: "./terraform"
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   terraform:
