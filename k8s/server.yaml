@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: zkpauth
+  labels:
+    app: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: server
+        image: ghcr.io/pavelnikolov/zkpauth-server:overridden-later
+        ports:
+        - name: grpc
+          containerPort: 50051
+        env:
+        - name: LISTEN_ADDR
+          value:  "0.0.0.0:50051"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
