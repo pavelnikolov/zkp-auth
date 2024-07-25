@@ -14,9 +14,9 @@ The implementation of this library uses discreet logarithm computation where the
 
 Once the above pre-requisite/steup step is completed there are 3 steps required to stablish a secure ZKP authentication:
 
-1. **commitment step** - the prover "registers" with the prover. During this step the prover chooses a secret (big) number _x_ and with it calculates two numbers y1, y2. Then these numbers are shared with the verifier (whithout shint _x_)
-2. **auth challenge step** - the prover initiates an authentication attempt by choosing a (very big) random number _k_ which is then used to calculate two values r1 and r1. R1 and r2 are sent to the verifier (without sharing _k_). In the response the verifier returns a randomly generated number _c_.
-3. **verification step** - the prover uses _c_ and _x_ to calculate a number _s_ whcih is sent to the verifier. Then the verifier calculates a new number using y1, y2, r1, r2, c and s to verify if the prover indeed knows _x_ without ever revealing it.  
+1. **Registration step** - the prover "registers" with the prover. During this step the prover chooses a secret (big) number _x_ and with it calculates two numbers y1, y2. Then these numbers are shared with the verifier (whithout shint _x_)
+2. **Commitment -> Challenge step** - the prover initiates an authentication attempt by choosing a (very big) random number _k_ which is then used to calculate two values r1 and r1. R1 and r2 are then sent to the verifier (without sharing _k_). In the response the verifier returns a randomly generated number _c_.
+3. **Verification step** - the prover uses the challenge _c_ from the previous step and its secret _x_ to calculate a solution _s_ whcih is sent to the verifier. Then the verifier calculates a new number using _y1_, _y2_, _r1_, _r2_, _c_ and _s_ to verify if the prover indeed knows _x_ without ever revealing it.  
 
 ## Assumptions and comments
 
