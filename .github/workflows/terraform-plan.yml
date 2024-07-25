@@ -21,6 +21,9 @@ jobs:
         contents: read
         id-token: write
         pull-requests: write
+    
+    env:
+      TF_VAR_state_bucket: ${{ secrets.TF_VAR_STATE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
 
