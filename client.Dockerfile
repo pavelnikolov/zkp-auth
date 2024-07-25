@@ -8,4 +8,5 @@ RUN cargo build --release --bin zkpauth-client
 # use distroless image instead of alpine because rust uses musl libc
 FROM gcr.io/distroless/cc-debian12
 COPY --from=builder /app/target/release/zkpauth-client /app/
+USER 1000
 CMD ["/app/zkpauth-client"]
