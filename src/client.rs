@@ -1,65 +1,57 @@
-use num_bigint::BigInt;
-use num_traits::{One, ToPrimitive};
-use rand::Rng;
-use tonic::{Response, Request,transport::Channel};
+use num_bigint::BigUint;
+use std::env;
+use zkp_auth::{auth_client::AuthClient, RegisterRequest, AuthenticationAnswerRequest, AuthenticationChallengeRequest};
+use ::zkp_auth::{gen_random_number_below, ZKP};
 
-use zkp_auth::{RegisterRequest, AuthenticationChallengeRequest, AuthenticationAnswerRequest, AuthenticationAnswerResponse};
-use zkp_auth::auth_client::AuthClient;
-
-mod zkp_auth {
+pub mod zkp_auth {
     tonic::include_proto!("zkp_auth");
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut client: AuthClient<Channel> = AuthClient::connect("http://[::1]:50051").await?;
+async fn main() {
+    let (g, h, p, q) = ::zkp_auth::default_cfg();
+    let zkp = ZKP { g: g.clone(), h: h.clone(), p: p.clone(), q: q.clone() };
 
-    let mut rng = rand::thread_rng();
-    // Registration
-    let n = rng.gen_range(0..128);
-    let x: BigInt = BigInt::from(n);
-    let g: BigInt = BigInt::one(); // Simplification, should be a proper generator
-    let h: BigInt = BigInt::one(); // Simplification, should be a proper generator
+    let addr = env::var("SERVER_ADDR").unwrap_or_else(|_| "http://127.0.0.1:50051".to_string());
 
-    let y1 = &g * &x;
-    let y2 = &h * &x;
+    let mut client = AuthClient::connect(addr).await.expect("Failed to connect to the server");
 
-    let request = tonic::Request::new(RegisterRequest {
-        user: "user1".to_string(),
-        y1: y1.to_i64().unwrap(), // Simplification, in real application handle BigInt properly
-        y2: y2.to_i64().unwrap(), // Simplification, in real application handle BigInt properly
-    });
+    let user_id: String = "Pavel".to_string();
+    let secret = BigUint::from(123456u32); // Hard-coded for simplicity, could use a random number too
 
-    let response: Response<zkp_auth::RegisterResponse> = client.register(request).await?;
-    println!("RESPONSE={:?}", response);
+    let y1 = g.modpow(&secret, &p); // g^secret mod p
+    let y2 = h.modpow(&secret, &p);  // h^secret mod p
 
-    // Authentication Challenge
-    let n = rng.gen_range(0..128);
-    let r: BigInt = BigInt::from(n);
-    let r1 = &g * &r;
-    let r2 = &h * &r;
+    let register_request = RegisterRequest {
+        user: user_id.clone(),
+        y1: y1.to_bytes_be(),
+        y2: y2.to_bytes_be(),
+    };
 
-    let request: Request<AuthenticationChallengeRequest> = Request::new(AuthenticationChallengeRequest {
-        user: "user1".to_string(),
-        r1: r1.to_i64().unwrap(), // Simplification, in real application handle BigInt properly
-        r2: r2.to_i64().unwrap(), // Simplification, in real application handle BigInt properly
-    });
+    client.register(register_request).await.expect("Failed to register user");
+    println!("Registration successful.");
 
-    let response = client.create_authentication_challenge(request).await?;
-    let challenge_res = response.into_inner();
-    let auth_id = challenge_res.auth_id;
-    let c = challenge_res.c;
+    let k = gen_random_number_below(&BigUint::from(1_000_000u32));
+    let r1 = g.modpow(&k, &p);
+    let r2 = h.modpow(&k, &p);
 
-    // Authentication Answer
-    let s = &r + &(BigInt::from(c) * &x);
+    let challenge_request = AuthenticationChallengeRequest {
+        user: user_id.clone(),
+        r1: r1.to_bytes_be(),
+        r2: r2.to_bytes_be(),
+    };
 
-    let request = Request::new(AuthenticationAnswerRequest {
-        auth_id: auth_id,
-        s: s.to_i64().unwrap(), // Simplification, in real application handle BigInt properly
-    });
+    let res = client.authentication_challenge(challenge_request).await.expect("Could not request challenge from server").into_inner();
+    println!("Received challenge from server.");
 
-    let response: Response<AuthenticationAnswerResponse> = client.verify_authentication(request).await?;
-    println!("RESPONSE={:?}", response);
+    let s = zkp.solve(&k, &BigUint::from_bytes_be(&res.c), &secret);
 
-    Ok(())
+    let answer_request = AuthenticationAnswerRequest {
+        auth_id: res.auth_id,
+        s: s.to_bytes_be(),
+    };
+
+    let res = client.verify_authentication(answer_request).await.expect("Could not verify authentication on server").into_inner();
+
+    println!("Successfully logged in! Session ID: {}", res.session_id);
 }

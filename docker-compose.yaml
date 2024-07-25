@@ -1,0 +1,19 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    environment:
+      # The server listens on all interfaces inside the container because 127.0.0.1 is not accessible from outside the container
+      - LISTEN_ADDR=0.0.0.0:50051
+    ports:
+      - 50051:50051
+  
+  client:
+    build:
+      context: .
+      dockerfile: client.Dockerfile
+    depends_on:
+      - server
+    environment:
+      - SERVER_ADDR=http://server:50051

@@ -2,32 +2,50 @@ syntax = "proto3";
 
 package zkp_auth;
 
+// The auth service definition for the ZKP authentication protocol.
 message RegisterRequest {
-     string user = 1;
-    int64 y1 = 2;
-    int64 y2 = 3;
+    string user = 1; // The username of the user trying to authenticate.
+    bytes y1 = 2; // The first public key of the user.
+    bytes y2 = 3; // The second public key of the user.
 }
-message RegisterResponse {}
 
+message RegisterResponse {
+}
+
+// The request for the authentication challenge.
 message AuthenticationChallengeRequest {
-    string user = 1;
-    int64 r1 = 2;
-    int64 r2 = 3;
+    string user = 1; // The username of the user trying to authenticate.
+    bytes r1 = 2; // The first random number.
+    bytes r2 = 3; // The second random number.
 }
+
+// The response to the authentication challenge.
 message AuthenticationChallengeResponse {
+    // The authentication challenge id.
     string auth_id = 1;
-    int64 c = 2;
+    // The challenge.
+    bytes c = 2;
 }
+
+// The request to verify the authentication answer.
 message AuthenticationAnswerRequest {
     string auth_id = 1;
-    int64 s = 2;
+    bytes s = 2;
 }
+
+// The response to the authentication answer.
 message AuthenticationAnswerResponse {
     string session_id = 1;
 }
 
+// The auth service definition for the ZKP authentication protocol.
 service Auth {
-    rpc Register(RegisterRequest) returns (RegisterResponse) {}
-    rpc CreateAuthenticationChallenge(AuthenticationChallengeRequest) returns (AuthenticationChallengeResponse) {}
-    rpc VerifyAuthentication(AuthenticationAnswerRequest) returns (AuthenticationAnswerResponse) {} 
+    // Register a user with the authentication service.
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+
+    // Request an authentication challenge.
+    rpc AuthenticationChallenge(AuthenticationChallengeRequest) returns (AuthenticationChallengeResponse);
+
+    // Verify the authentication answer.
+    rpc VerifyAuthentication(AuthenticationAnswerRequest) returns (AuthenticationAnswerResponse);
 }
