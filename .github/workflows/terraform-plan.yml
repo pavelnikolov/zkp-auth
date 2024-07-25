@@ -8,6 +8,7 @@ on:
 env:
   TF_WORKSPACE: "default"
   CONFIG_DIRECTORY: "./terraform"
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   terraform:
@@ -21,6 +22,9 @@ jobs:
         contents: read
         id-token: write
         pull-requests: write
+    
+    env:
+      TF_VAR_state_bucket: ${{ secrets.TF_VAR_STATE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +32,9 @@ jobs:
         id: assume
         uses: aws-actions/configure-aws-credentials@v1
         with:
+          aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: ${{ github.actor }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
 
       - uses: hashicorp/setup-terraform@v3
 

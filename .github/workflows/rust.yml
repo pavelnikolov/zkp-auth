@@ -2,9 +2,16 @@ name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - 'main'
   pull_request:
-    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/rust.yml'
+      - 'build.rs'
 
 env:
   CARGO_TERM_COLOR: always

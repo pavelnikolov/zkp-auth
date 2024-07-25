@@ -1,0 +1,57 @@
+name: "Network Terraform Apply"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+
+env:
+  TF_WORKSPACE: "default"
+  CONFIG_DIRECTORY: "./terraform"
+
+jobs:
+  terraform:
+    name: "Network Terraform Plan & Apply"
+    runs-on: ubuntu-latest
+  
+    defaults:
+      run:
+        working-directory: ${{ env.CONFIG_DIRECTORY }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assume AWS Credentials
+        id: assume
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: ${{ github.actor }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -out=tf.plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tf.plan

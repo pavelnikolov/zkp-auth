@@ -3,3 +3,6 @@ server.Dockerfile
 README.md
 docker-compose.yml
 target/
+terraform/.terraform
+terraform/terraform.tfstate
+terraform
