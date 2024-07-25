@@ -2,8 +2,8 @@ name: "Terraform Plan"
 
 on:
   pull_request:
-    paths:
-      - './terraform/**'
+    # paths:
+    #   - './terraform/**'
 
 env:
   TF_WORKSPACE: "default"
