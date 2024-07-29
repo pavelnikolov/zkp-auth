@@ -7,6 +7,7 @@ on:
 env:
   TF_WORKSPACE: "default"
   CONFIG_DIRECTORY: "./terraform"
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   terraform:
@@ -41,13 +42,27 @@ jobs:
         id: init
         run: terraform init
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
+      - name: Set terraform output vars
+        id: vars
+        run: |
+          printf "cluster_name=%s\n" $(terraform output -raw cluster_name) >> "$GITHUB_OUTPUT"
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -out=tf.plan
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tf.plan
+      - id: install-aws-cli
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2                         # default
+          verbose: false                     # default
+          arch: amd64                        # allowed values: amd64, arm64
+
+      - uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+          kubectl-version: v1.30.0
+
+      - name: configure kubeconfig
+        run: |
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ steps.vars.outputs.cluster_name }}
+
+      - name: Kubernetes Apply
+        run: kubectl apply -k k8s/
