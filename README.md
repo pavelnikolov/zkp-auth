@@ -44,7 +44,22 @@ Some functional tests have been added which test the process of registration, at
 
 ### Client and Server setup
 
-Assuming that Docker is present on your machine, the client and the server can be started by running `docker compose up`. Alternatively, if Docker is not available, one can always run the binaries using `cargo` like this:
+Assuming that Docker is present on your machine, the client and the server can be started by running using the `docker-compose.yaml` file:
+
+```bash
+$ docker compose up
+[+] Running 2/0
+ ✔ Container zkp-auth-server-1  Created                                                                              0.0s
+ ✔ Container zkp-auth-client-1  Created                                                                              0.0s
+Attaching to client-1, server-1
+server-1  | Listening for connections on 0.0.0.0:50051
+client-1  | Registration successful.
+client-1  | Received challenge from server.
+client-1  | Successfully logged in! Session ID: OooJ8n7FOOU1ZyhxOqfBhsvK5x4mwdP7
+client-1 exited with code 0
+```
+
+Alternatively, if Docker is not available, one can always run the binaries using `cargo` like this:
 
 * Run `cargo run --bin zkpauth-server` in one terminal; and then
 * Run `cargo run --bin zkpauth-client` in another terminal

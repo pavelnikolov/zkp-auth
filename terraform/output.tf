@@ -1,7 +1,9 @@
-output "endpoint" {
-  value = aws_eks_cluster.default.endpoint
+output "cluster_endpoint" {
+  value     = aws_eks_cluster.demo.endpoint
+  sensitive = true
 }
 
-output "kubeconfig-certificate-authority-data" {
-  value = aws_eks_cluster.default.certificate_authority[0].data
+output "cluster_name" {
+  value     = aws_eks_cluster.demo.name
+  sensitive = true
 }
