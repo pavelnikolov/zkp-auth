@@ -12,8 +12,12 @@ path = "src/server.rs"
 name = "zkpauth-client"
 path = "src/client.rs"
 
+[[bin]] # Bin to demonstrate the Elliptic curve example
+name = "ec-example"
+path = "src/elliptic_curve.rs"
+
 [dependencies]
-num-bigint = {version = "0.4.6", features = ["rand"]}
+num-bigint = { version = "0.4.6", features = ["rand"] }
 num-traits = "0.2"
 prost = "0.13"
 rand = "0.8.5"
@@ -21,6 +25,7 @@ hex = "0.4"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 tonic = "0.12"
 uuid = { version = "1", features = ["v4"] }
+k256 = "0.13.3"
 
 [build-dependencies]
 tonic-build = "0.12"
